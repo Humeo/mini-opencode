@@ -10,6 +10,7 @@ export interface ProviderConfig {
 export interface Config {
   model: string
   skills?: string
+  defaultProvider?: string
   mcp?: Record<string, { cmd: string; args?: string[] }>
   providers?: Record<string, ProviderConfig>
 }
