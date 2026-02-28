@@ -20,7 +20,7 @@ function getDB(): Database {
 }
 
 export function saveMessage(sessionID: string, msg: ModelMessage) {
-  getDB().run("INSERT INTO message (sid, role, data) values (?,?,?)", [
+  getDB().run("INSERT INTO messages (sid, role, data) values (?,?,?)", [
     sessionID,
     msg.role,
     JSON.stringify(msg.content),
@@ -35,8 +35,24 @@ export function loadMessage(sessionID: string) {
     >("SELECT role, data FROM messages WHERE sid = ? ORDER BY id ASC")
     .all(sessionID)
 
-  return rows.map((r) => ({
-    role: r.role as ModelMessage["role"],
-    content: JSON.parse(r.data),
-  }))
+  return rows.map((r) => {
+    const content = JSON.parse(r.data)
+    // OpenAI-compatible APIs expect assistant message content as a plain string,
+    // not the array format [{type:'text',text:'...'}] that the AI SDK stores internally.
+    const normalizedContent =
+      r.role === "assistant" &&
+      Array.isArray(content) &&
+      content.every(
+        (p: unknown) =>
+          p && typeof p === "object" && (p as Record<string, unknown>).type === "text",
+      )
+        ? content
+            .map((p: Record<string, unknown>) => p.text as string)
+            .join("")
+        : content
+    return {
+      role: r.role as ModelMessage["role"],
+      content: normalizedContent,
+    }
+  })
 }

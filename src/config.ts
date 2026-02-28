@@ -38,7 +38,7 @@ export function ParseModel(model: string, provider?: string) {
     }
   }
   return {
-    modelID: model.slice(0, slash),
-    providerID: model.slice(slash + 1),
+    providerID: model.slice(0, slash),
+    modelID: model.slice(slash + 1),
   }
 }

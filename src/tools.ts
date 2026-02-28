@@ -38,7 +38,7 @@ export const readTool = tool({
   execute: async ({ path, offset, limitd }) => {
     console.log(`\n[read] ${path}`)
     const file = Bun.file(path)
-    const exist = file.exists()
+    const exist = await file.exists()
     if (!exist) {
       return { error: `file not exist, file path ${path}` }
     }
